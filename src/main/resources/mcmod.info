@@ -1,0 +1,16 @@
+[
+{
+  "modid": "goldblocksnowball",
+  "name": "Gold Block Snow Ball",
+  "description": "Change a block hit snow ball with gold block",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Iunius118"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
