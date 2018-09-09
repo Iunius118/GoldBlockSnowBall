@@ -4,11 +4,14 @@ import org.apache.logging.log4j.Logger;
 
 import iunius118.mods.goldblocksnowball.config.Configs;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Config.Type;
@@ -36,7 +39,7 @@ public class GoldBlockSnowBall
 
     public static final String MOD_ID = "goldblocksnowball";
     public static final String MOD_NAME = "Gold Block Snow Ball";
-    public static final String MOD_VERSION = "1.12-0.0.0.0";
+    public static final String MOD_VERSION = "1.12-0.0.1.0";
     public static final String MOD_DEPENDENCIES = "required-after:forge@[1.12-14.21.1.2387,)";
 
     public static final Configs CONFIGS = new Configs();
@@ -65,16 +68,18 @@ public class GoldBlockSnowBall
 
     	EntityThrowable entity = event.getEntityThrowable();
 
-    	if (entity instanceof EntitySnowball)
+    	if (entity instanceof EntitySnowball && !entity.world.isRemote)
     	{
         	RayTraceResult result = event.getRayTraceResult();
 
         	if (result != null && result.typeOfHit == RayTraceResult.Type.BLOCK)
         	{
         		BlockPos pos = result.getBlockPos();
+        		Vec3d hit = result.hitVec;
         		World world = entity.world;
 
-        		world.setBlockState(pos, blockToReplaceWith.getDefaultState());
+        		IBlockState iblockstate = blockToReplaceWith.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, Configs.blockMetadataToReplaceWith, entity.getThrower(), EnumHand.MAIN_HAND);
+        		world.setBlockState(pos, iblockstate);
         	}
     	}
 

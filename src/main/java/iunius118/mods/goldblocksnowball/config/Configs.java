@@ -16,4 +16,8 @@ public class Configs {
     @LangKey(GoldBlockSnowBall.MOD_ID + ".config.block_id_to_replace_with")
     public static String blockIDToReplaceWith = "minecraft:gold_block";
 
+    @Comment("Metadata of block to replace with")
+    @LangKey(GoldBlockSnowBall.MOD_ID + ".config.block_metadata_to_replace_with")
+    public static int blockMetadataToReplaceWith = 0;
+
 }
