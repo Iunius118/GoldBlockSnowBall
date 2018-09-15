@@ -5,9 +5,13 @@ import org.apache.logging.log4j.Logger;
 import iunius118.mods.goldblocksnowball.config.Configs;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -70,15 +74,43 @@ public class GoldBlockSnowBall
 
     	if (entity instanceof EntitySnowball && !entity.world.isRemote)
     	{
-        	RayTraceResult result = event.getRayTraceResult();
+    		EntityLivingBase thrower = entity.getThrower();
+
+    		if (Configs.enableSurvivalModePlayer == false
+    				&& thrower instanceof EntityPlayer
+    				&& ((EntityPlayer) thrower).capabilities.isCreativeMode == false)
+    		{
+    			return;
+    		}
+
+    		RayTraceResult result = event.getRayTraceResult();
 
         	if (result != null && result.typeOfHit == RayTraceResult.Type.BLOCK)
         	{
+        		Block block = blockToReplaceWith;
+        		int metadate = Configs.blockMetadataToReplaceWith;
+
+        		if (Configs.enableOffhandBlock && thrower != null)
+        		{
+        			ItemStack stack = thrower.getHeldItemOffhand();
+
+        			if (stack.isEmpty() == false && stack.getItem() instanceof ItemBlock)
+        			{
+        				Block offhandBlock = ((ItemBlock) stack.getItem()).getBlock();
+
+        				if (offhandBlock != null)
+        				{
+        					block = offhandBlock;
+        					metadate = stack.getMetadata();
+        				}
+        			}
+        		}
+
         		BlockPos pos = result.getBlockPos();
         		Vec3d hit = result.hitVec;
         		World world = entity.world;
 
-        		IBlockState iblockstate = blockToReplaceWith.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, Configs.blockMetadataToReplaceWith, entity.getThrower(), EnumHand.MAIN_HAND);
+        		IBlockState iblockstate = block.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, metadate, thrower, EnumHand.MAIN_HAND);
         		world.setBlockState(pos, iblockstate);
         	}
     	}
