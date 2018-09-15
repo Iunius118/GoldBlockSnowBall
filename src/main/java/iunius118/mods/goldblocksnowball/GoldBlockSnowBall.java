@@ -43,7 +43,7 @@ public class GoldBlockSnowBall
 
     public static final String MOD_ID = "goldblocksnowball";
     public static final String MOD_NAME = "Gold Block Snow Ball";
-    public static final String MOD_VERSION = "1.12-0.0.2.0";
+    public static final String MOD_VERSION = "1.12-0.0.3.0";
     public static final String MOD_DEPENDENCIES = "required-after:forge@[1.12-14.21.1.2387,)";
 
     public static final Configs CONFIGS = new Configs();
