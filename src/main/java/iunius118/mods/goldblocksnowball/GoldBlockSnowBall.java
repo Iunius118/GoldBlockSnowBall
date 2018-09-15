@@ -50,6 +50,7 @@ public class GoldBlockSnowBall
     public static Logger logger;
 
     public static Block blockToReplaceWith = Blocks.GOLD_BLOCK;
+    public static boolean hasCheckedBlock = false;
 
 
     @EventHandler
@@ -87,9 +88,12 @@ public class GoldBlockSnowBall
 
         	if (result != null && result.typeOfHit == RayTraceResult.Type.BLOCK)
         	{
-        		Block block = blockToReplaceWith;
-        		int metadate = Configs.blockMetadataToReplaceWith;
+        		BlockPos pos = result.getBlockPos();
+        		Vec3d hit = result.hitVec;
+        		World world = entity.world;
+        		IBlockState iblockstate;
 
+        		// Replace block with player's off-hand block
         		if (Configs.enableOffhandBlock && thrower != null)
         		{
         			ItemStack stack = thrower.getHeldItemOffhand();
@@ -100,21 +104,56 @@ public class GoldBlockSnowBall
 
         				if (offhandBlock != null)
         				{
-        					block = offhandBlock;
-        					metadate = stack.getMetadata();
+        					Block block = offhandBlock;
+        					int metadate = stack.getMetadata();
+        					iblockstate = block.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, metadate, thrower, EnumHand.MAIN_HAND);
+        					setBlockState(world, pos, iblockstate);
+        					return;
         				}
         			}
         		}
 
-        		BlockPos pos = result.getBlockPos();
-        		Vec3d hit = result.hitVec;
-        		World world = entity.world;
+        		// Replace block with configured block
+        		if (blockToReplaceWith == null)
+        		{
+        			return;
+        		}
 
-        		IBlockState iblockstate = block.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, metadate, thrower, EnumHand.MAIN_HAND);
-        		world.setBlockState(pos, iblockstate);
+        		Block block = blockToReplaceWith;
+        		int metadate = Configs.blockMetadataToReplaceWith;
+
+        		if (hasCheckedBlock)
+        		{
+            		iblockstate = block.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, metadate, thrower, EnumHand.MAIN_HAND);
+        		}
+        		else
+        		{
+        			// Check block metadata
+        			try
+        			{
+                		iblockstate = block.getStateForPlacement(world, pos, result.sideHit, (float) hit.x, (float) hit.y, (float) hit.z, metadate, thrower, EnumHand.MAIN_HAND);
+        			}
+        			catch(Exception e)
+        			{
+        				blockToReplaceWith = null;
+        				return;
+        			}
+
+        			hasCheckedBlock = true;
+        		}
+
+        		setBlockState(world, pos, iblockstate);
         	}
     	}
 
+    }
+
+    public static void setBlockState(World world, BlockPos pos, IBlockState iblockstate)
+    {
+    	if (world != null && pos != null && iblockstate != null)
+    	{
+    		world.setBlockState(pos, iblockstate);
+    	}
     }
 
     @SideOnly(Side.CLIENT)
@@ -138,8 +177,9 @@ public class GoldBlockSnowBall
     {
         blockToReplaceWith = Block.getBlockFromName(Configs.blockIDToReplaceWith);
 
-        if (blockToReplaceWith == null) {
-        	blockToReplaceWith = Blocks.GOLD_BLOCK;
+        if (blockToReplaceWith != null)
+        {
+        	hasCheckedBlock = false;
         }
     }
 
